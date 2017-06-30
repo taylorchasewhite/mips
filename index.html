@@ -1,0 +1,470 @@
+<html>
+<head>
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+	<script src="/js/cbpFWTabs.js"></script>
+	<script src="/scripts/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
+	<script src="/compiler/compilerGen.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<style>
+  .post_content ul li:before {
+    content: none !important;
+  }
+</style>
+<body>
+<section>
+ <div class="tabs tabs-style-linemove" style="height:350px;">
+  <nav>
+   <ul>
+    <li><a href="#section-linemove-1" class="icon icon-home"><span>About</span></a></li>
+    <li><a href="#section-linemove-2" class="icon icon-box"><span>Reserved Words</span></a></li>
+    <li><a href="#section-linemove-3" class="icon icon-display"><span>IDs & Lits</span></a></li>
+    <li><a href="#section-linemove-4" class="icon icon-upload"><span>Syntax</span></a></li>
+    <li><a href="#section-linemove-5" class="icon icon-tools"><span>Grammar</span></a></li>
+   </ul>
+  </nav>
+  <div class="content-wrap">
+   <section id="section-linemove-1">
+    <header class="entry-header">
+		<h1 class="entry-title">MIPS Compiler</h1>
+	</header>
+	<div style="height:550px;">
+		In the spring of 2014, Robert Smayda and I wrote our own computer language. The language has an LL(1) grammar, which means input is parsed from left to right and constructs a <a href="http://en.wikipedia.org/wiki/Context-free_grammar#Derivations_and_syntax_trees">leftmost syntax tree</a> (derivation). An LL(1) language means that our grammar is context-free, which greatly decreased the difficulty in building an accompanying parser. 
+		<br/><br/>
+		A parser is a tool that iterates through a given set of code and ensures it follows the required grammatical structure. For instance, the english language has a set of <a href="http://rwc.hunter.cuny.edu/reading-writing/on-line/req-sent.html">requirements</a>, like a capital letter at the beginning of the sentence and a period, question mark, or exclamation point at the end. If either of those were missing, a parser would "throw an error" and identify the improper grammar.
+		<br/><br/>
+		In the same vein, our grammar has rules, like the requirement of the words "begin" and "end" at the start and finish of a program. The requirements for our language's grammar can be found a few tabs over.
+		<br/><br/>
+		In addition to a parser, there is an additional tool used to verify a program structure, known as a lexer. A lexer, or <a href="http://en.wikipedia.org/wiki/Lexical_analysis">lexical analyzer</a> is used to validate the tokens in a program. Jumping back to our comparison with the English language we can see why this tool is needed. Imagine we had the sentence, "I like dogs". The parser verifies there is a capital letter in the beginning, a period in the end, and a subject, verb and object. This is a valid sentence. Now imagine it was changed to "I like asdasd". This sentence has a capital letter, a period, and a subject (I), verb (like), and object (asdasd). The parser would then validate this sentence as well. However, asdasd is meaningless, and as such this sentence shouldn't be accepted. That's where the lexer comes in. The lexer takes a sequence of characters (e.g. every letter) and converts them into a sequence of tokens (e.g. words). If a token does not match a set of rules, then the lexer will throw an error and invalidate the program. In the English language example, the simplest definition of requirements would be "words in the english language".
+		<br/><br/>
+		When these two tools are used together, they can be used to validate a program. Once the grammar has a parser and lexer, we are able to generate machine operations to execute our commands.
+		<br/><br/>
+		We wrote our parser as a recurse descent parser, which interacts with our lexer and code generation modules. All code can be found on my github site. I've ported it to the web for you to demo below. Enjoy! 
+
+		Our compiler compiles our invented language into the <a href="https://en.wikipedia.org/wiki/MIPS_architecture">MIPS assembly language instruction set</a>.
+   </div>
+   </section>
+   <section id="section-linemove-2">
+      <div class="col1" style="float:left;">
+	<table class="api_table">
+		<thead>
+			<tr>
+				<td>Name</td>
+				<td>Syntax</td>
+				<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				</td>
+				<td>Name</td>
+				<td>Syntax</td>
+			</tr>
+		</thead>
+		<tr class="first even">
+			<td>BEGIN</td><td>begin</td>
+			<td></td>
+			<td>END</td>
+			<td>end</td>
+		</tr>
+		<tr class="odd">
+			<td>READ</td><td>read</td>
+			<td></td>
+			<td>WRITE</td><td>write</td>
+		</tr>
+		<tr class="even">
+			<td>INT</td><td>int</td>
+			<td></td>
+			<td>STRING</td><td>string</td>
+		</tr>
+		<tr class="odd">
+			<td>BOOL</td>
+			<td>bool</td>
+			<td></td>
+			<td>IF</td>
+			<td>if</td>
+		</tr>
+		<tr class="even">
+			<td>ELSE</td>
+			<td>else</td>
+			<td></td>
+			<td>WHILE</td>
+			<td>while</td>
+		</tr>
+		<tr class="odd">
+			<td>TRUE</td>
+			<td>True</td>
+			<td></td>
+			<td>FALSE</td>
+			<td>False</td>
+		</tr>
+		<tr class="even">
+			<td>AND</td>
+			<td>and</td>
+			<td></td>
+			<td>OR</td>
+			<td>or</td>
+		</tr>
+		<tr class="last odd">
+			<td>NOT</td>
+			<td>not</td>
+			<td></td>
+			<td></td>
+			<td></td>
+		</tr>
+	</table>
+</section>
+<section id="section-linemove-3">
+	<table class="api_table">
+		<thead>
+			<tr>
+				<td>Name</td>
+				<td>Syntax</td>
+			</tr>
+		</thead>
+		<tr class="first even">
+			<td>ID</td>
+			<td>\w(\w|\d)*</td>
+		</tr>
+		<tr class="odd">
+			<td>INTLITERAL</td>
+			<td>\d+</td>
+		</tr>
+		<tr class="even">
+			<td>STRINGLITERAL</td>
+			<td>".*?"</td>
+		</tr>
+	</table>
+</section>
+<section id="section-linemove-4">
+	<table class="api_table">
+		<thead>
+			<tr>
+				<td>Name</td>
+				<td>Syntax</td>
+				<td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+					&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				</td>
+				<td>Name</td>
+				<td>Syntax</td>
+			</tr>
+		</thead>
+		<tr class="even first">
+			<td>PLUS</td>
+			<td>+</td>
+			<td></td>
+			<td>MINUS</td>
+			<td>-</td>
+		</tr>
+		<tr class="odd">
+			<td>DIV</td>
+			<td>/</td>
+			<td></td>
+			<td>MOD</td>
+			<td>%</td>
+		</tr>
+		<tr class="even">
+			<td>EQUALTO</td>
+			<td>==</td>
+			<td></td>
+			<td>LESS_EQUALS</td>
+			<td>&lt;=</td>
+		</tr>
+		<tr class="odd">
+			<td>GREATER_EQUALS</td>
+			<td>&gt;=</td>
+			<td></td>
+			<td>LESSTHAN</td>
+			<td>&lt;</td>
+		</tr>
+		<tr class="even">
+			<td>GREATERTHAN</td>
+			<td>&gt;</td>
+			<td></td>
+			<td>AND</td>
+			<td>&amp;&amp;</td>
+		</tr>
+		<tr class="odd">
+			<td>OR</td>
+			<td>||</td>
+			<td></td>
+			<td>NOT</td>
+			<td>!</td>
+		</tr>
+		<tr class="even">
+			<td>LPAREN</td>
+			<td>(</td>
+			<td></td>
+			<td>RPAREN</td>
+			<td>)</td>
+		</tr>
+		<tr class="odd">
+			<td>SEMICOLON</td>
+			<td>;</td>
+			<td></td>
+			<td>COMMA</td>
+			<td>,</td>
+		</tr>
+		<tr class="even">
+			<td>ASSIGNOP</td><td>:=</td>
+			<td></td>
+			<td>LCURLY</td><td>{</td>
+			</tr>
+			<tr class="odd last">
+				<td>RCURLY</td><td>}</td>
+				<td></td>
+				<td></td><td></td>
+			</tr>
+		</table>
+	</section>
+	<section id="section-linemove-5">
+		<table class="api_table">
+			<tr class="first odd">
+				<th>Term</th>
+				<th></th>
+				<th>Definition</th>
+			</tr>
+			<tr class="even">
+				<td>&lt;program&gt;</td>
+				<td>&gt;</td>
+				<td>#start begin &lt;statement list&gt; end #finish</td>
+			</tr>
+			<tr class="odd">
+				<td>&lt;content&gt;</td>
+				<td>&gt;</td>
+				<td>{&lt;statement list}</td>
+			</tr>
+			<tr class="even">
+				<td>&lt;statement list&gt;</td>
+				<td></td>
+				<td>&lt;statement&gt; {statement list}</td>
+			</tr>
+			<tr class="odd">
+				<td>&lt;statement&gt;</td>
+				<td>&gt;</td>
+				<td>&lt;type&gt; &lt;ident&gt; #declare ;</td>
+			</tr>
+			<tr class="even">
+				<td></td>
+				<td>&gt;</td>
+				<td>&lt;ident&gt; := &lt;expression&gt; #assign ;</td>
+			</tr>
+			<tr class="odd">
+				<td></td>
+				<td>&gt;</td>
+				<td>read(&lt;id list&gt; #read_ids ) ;</td>
+			</tr>
+			<tr class="even">
+				<td></td>
+				<td>&gt;</td>
+				<td>write(&lt;expr list&gt; #write_exprs) ;</td>
+			</tr>
+			<tr class="odd">
+				<td></td>
+				<td>&gt;</td>
+				<td>while (&lt;expression&gt;) &lt;content&gt;</td>
+			</tr>
+			<tr class="even">
+				<td></td>
+				<td></td>
+				<td>if (&lt;expression&gt;) &lt;content&gt; { else &lt;content&gt; }</td>
+			</tr>
+			<tr class="odd">
+				<td>&lt;id list&gt;</td>
+				<td></td>
+				<td>&lt;ident&gt; {, &lt;ident&gt;}</td>
+			</tr>
+			<tr class="even">
+				<td>&lt;expr list&gt;</td>
+				<td>&gt;</td>
+				<td>&lt;expression&gt; {, &lt;expression&gt; }</td>
+			</tr>
+			<tr class="odd">
+				<td>&lt;expression&gt;</td>
+				<td>&gt;</td>
+				<td>&lt;bool&gt; { &lt;bool_op&gt; &lt;bool&gt; #bool_op }</td>
+			</tr>
+			<tr class="even">
+				<td>&lt;bool&gt;</td>
+				<td>&gt;</td>
+				<td>&lt;clause&gt; { &lt;num_op&gt; &lt;clause&gt; #num_op }</td>
+			</tr>
+			<tr class="odd">
+				<td>&lt;clause&gt;</td>
+				<td>&gt;</td>
+				<td>&lt;term&gt; { &lt;plus_op&gt; &lt;term&gt; #add_op }</td>
+			</tr>
+			<tr class="even">
+				<td>&lt;term&gt;</td>
+				<td>&gt;</td>
+				<td>&lt;factor&gt; { &lt;mult_op&gt; &lt;factor&gt; #mult_op }</td>
+			</tr>
+			<tr class="odd">
+				<td>&lt;factor&gt;</td>
+				<td>&gt;</td>
+				<td>&lt;neg_op&gt; &lt;primary&gt; #negate_term</td>
+			</tr>
+			<tr class="even">
+				<td></td>
+				<td>&gt;</td>
+				<td>&lt;primary&gt;</td>
+			</tr>
+			<tr class="odd">
+				<td>&lt;primary&gt;</td>
+				<td>&gt;</td>
+				<td>(&lt;expression&gt;)</td>
+			</tr>
+			<tr class="even">
+				<td></td>
+				<td>&gt;</td>
+				<td>&lt;ident&gt;</td>
+			</tr>
+			<tr class="odd">
+				<td></td>
+				<td>&gt;</td>
+				<td>INTLITERAL #process_int_literal</td>
+			</tr>
+			<tr class="even">
+				<td></td>
+				<td>&gt;</td>
+				<td>STRINGLITERAL #process_string_literal</td>
+			</tr>
+			<tr class="odd">
+				<td></td>
+				<td>&gt;</td>
+				<td>BOOLLITERAL # process_bool_literal</td>
+			</tr>
+			<tr class="even">
+				<td>&lt;ident&gt;</td>
+				<td>&gt;</td>
+				<td>ID # process_id</td>
+			</tr>
+			<tr class="odd">
+				<td>&lt;type&gt;</td>
+				<td>&gt;</td>
+				<td>int</td>
+			</tr>
+			<tr class="even">
+				<td></td>
+				<td>&gt;</td>
+				<td>string</td>
+			</tr>
+			<tr class="odd">
+				<td></td>
+				<td>&gt;</td>
+				<td>bool</td>
+			</tr>
+			<tr class="even">
+				<td>&lt;plus_op&gt;</td>
+				<td>&gt;</td>
+				<td>PLUS</td>
+			</tr>
+			<tr class="odd">
+				<td></td>
+				<td>&gt;</td>
+				<td>MINUS</td>
+			</tr>
+			<tr class="even">
+				<td>&lt;mult_op&gt;</td>
+				<td>&gt;</td>
+				<td>MULT</td>
+			</tr>
+			<tr class="odd">
+				<td></td>
+				<td>&gt;</td>
+				<td>DIV</td>
+			</tr>
+			<tr class="even">
+				<td></td>
+				<td>&gt;</td>
+				<td>MOD</td>
+			</tr>
+			<tr class="odd">
+				<td>&lt;neg_op&gt;</td>
+				<td>&gt;</td>
+				<td>MINUS</td>
+			</tr>
+			<tr class="even">
+				<td></td>
+				<td>&gt;</td>
+				<td>NOT</td>
+			</tr>
+			<tr class="odd">
+				<td>&lt;num_op&gt;</td>
+				<td>&gt;</td>
+				<td>EQUALTO</td>
+			</tr>
+			<tr class="even">
+				<td></td>
+				<td>&gt;</td>
+				<td>LESSTHAN</td>
+			</tr>
+			<tr class="odd">
+				<td></td>
+				<td>&gt;</td>
+				<td>GREATERTHAN</td>
+			</tr>
+			<tr class="even">
+				<td></td>
+				<td>&gt;</td>
+				<td>LESS_EQUALS</td>
+			</tr>
+			<tr class="odd">
+				<td></td>
+				<td>&gt;</td>
+				<td>GREATER_EQUALS</td>
+			</tr>
+			<tr class="even">
+				<td>&lt;bool_op&gt;</td>
+				<td>&gt;</td>
+				<td>AND</td>
+			</tr>
+			<tr class="odd">
+				<td></td>
+				<td>&gt;</td>
+				<td>OR</td>
+			</tr>
+			<tr class="even last">
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		</table>
+	</section>
+</div><!-- /content -->
+</div><!-- /tabs -->
+</section>
+
+<div id="content" class="clearfix full-width-content">
+	<div id="compiler" style="margin-top:15px;">
+		<div id="topCompiler">
+			<div style="float:left; width:45%;">Enter program:
+			</div>
+			<div style="float:right; width:45%;">Compiled Output:<br/>
+			</div>
+		</div>
+		<div style="clear:both;"></div>
+		<div style="position:relative;">
+			<div><button type="button" id="btnCompile" style="float:left;" class="btn btnBlue">Compile!</button>
+				<div id="parseErrorDiv" style="float:right; width:45%;" class="hidden parseError"></div>
+			</div>
+			<div style="clear:both;"></div>
+			<div style="float:left;width:45%;">
+				<div>
+					<div id="editor0" style="z-index:1;position:relative;top:0;right:0; bottom:0; left:0;height:500px; width:100%;">begin
+int x;
+x:=1;
+write(x&lt;20);
+end
+</div>
+				</div>
+			</div>
+			<div id="" style="float:right; width:45%; text-align:left;">
+				<div>
+					<div id="editor1" style="z-index:1;position:relative;top:0;right:0; bottom:0; left:0;height:500px; width:100%;"></div>
+				</div>
+				<script>
+					initializeCompiler();
+					loadTabStyleSheets();
+					</script> 
+				</div>
+				<div style="clear:both;"></div>
+			</div>
+		</body>
+</html>		

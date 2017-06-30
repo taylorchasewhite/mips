@@ -1,0 +1,136 @@
+.btn {
+	margin-top: 3px;
+	margin-bottom: 5px;
+	position: relative;
+	vertical-align: bottom;
+	width: 25%;
+	height: 35px;
+	font-size: 18px;
+	color: white;
+	padding: 5px;
+	text-align: center;
+	text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+	border: 0;
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.btnBlue {
+	background: #3498db;
+	border-bottom: 2px solid #2a8bcc;
+	-webkit-box-shadow: inset 0 -2px #2a8bcc;
+	box-shadow: inset 0 -2px #2a8bcc;
+}
+
+.btnGreen {
+	background: #2ecc71;
+	border-bottom: 2px solid #28be68;
+	-webkit-box-shadow: inset 0 -2px #28be68;
+	box-shadow: inset 0 -2px #28be68;
+}
+
+/* btn colors found at http://codepen.io/Varo/full/gbzpmw */
+.btnRed {
+}
+
+
+.coffee-icon {
+	height:200px;
+	width:150px;
+}
+
+.hidden {
+	display: none;
+}
+
+.highlights {
+	background-image: url("/icon/flat/png/64/light-bulb.png");
+	width: 85%;
+	margin: auto;
+	min-height: 100px;
+	background-repeat: no-repeat;
+	padding-left: 5em;
+	padding-top: 1em;
+}
+
+.parseError {
+	color: #D8000C;
+	background-color: #e74c3c;
+	background-image: url('/icon/PNG/error-flat.png');
+	border-bottom: 2px solid #db4334;
+	-webkit-box-shadow: inset 0 -2px #db4334;
+	box-shadow: inset 0 -2px #db4334;
+	color: white;
+}
+
+#parseErrorDiv {
+	margin-bottom: 5px;
+	padding: 5px;
+	padding-left: 50px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	border-bottom-width: 1px;
+	text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+	border-radius: 3px;
+	margin-top: 3px;
+	background-repeat: no-repeat;
+	background-position: 10px center;
+	background-size: 36px 36px;
+	-webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+	-moz-box-sizing: border-box;    /* Firefox, other Gecko */
+	box-sizing: border-box;         /* Opera/IE 8+ */
+
+}
+
+.parseInfo {
+	color: #00529B;
+	background-color: #BDE5F8;
+	background-image: url('icons/info.png');
+}
+
+.parseSuccess {
+	color: #4F8A10;
+	background-color: #2ecc71;
+	background-image: url('/icon/PNG/success-flat.png');
+	border-bottom: 2px solid #28be68;
+	-webkit-box-shadow: inset 0 -2px #28be68;
+	box-shadow: inset 0 -2px #28be68;
+	color: white;
+}
+
+.parseValidation {
+	color: #D63301;
+	background-color: #FFCCBA;
+	background-image: url('/icon/validation.png');
+}
+
+.parseWarning {
+	color: #9F6000;
+	background-color: #FEEFB3;
+	background-image: url('icons/warning.png');
+}
+
+.showLess {
+	background-image: url("/icon/flat/png/48/sign-up.png");
+	margin: auto;
+	min-height: 100px;
+	background-repeat: no-repeat;
+	padding-left: 5em;
+	cursor: pointer;
+	width: 50px;
+}
+
+.showMore {
+	background-image: url("/icon/flat/png/48/sign-down.png");
+	margin: auto;
+	min-height: 100px;
+	background-repeat: no-repeat;
+	padding-left: 5em;
+	display: none;
+	cursor: pointer;
+	width: 50px;
+}
+
+.showLess,.showMore {
+	float:left;
+}

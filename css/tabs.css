@@ -1,0 +1,66 @@
+/* API Table
+ * ---------------*/
+table.api_table {
+	width: 740px;
+	min-width:300px;
+	margin-bottom: 10px;
+	empty-cells: show;
+}
+
+table.api_table tr.even td {
+	background-color: #f7f7f7;
+}
+
+table.api_table td {
+	height: 20px;
+	font-size: 12px;
+	color: #333;
+	font-family: "Lucida Grande", Verdana;
+	padding: 7px 5px;
+	border-bottom: 1px solid #ddd;
+}
+
+table.api_table td.first {
+	border-left: 1px solid #ddd;
+	padding-left: 7px;
+}
+
+table.api_table td.last {
+	border-right: 1px solid #ddd;
+}
+
+table.api_table td.default,
+table.api_table td.type {
+	font-size: 10px;
+	color: #666;
+}
+
+table.api_table td.default,
+table.api_table td.type {
+	width: 80px;
+}
+
+table.api_table td.example {
+	font-size: 10px;
+	text-align: right;
+}
+
+table.api_table td.signature {
+	min-width: 375px;
+}
+
+table.api_table thead td {
+	font-size: 10px;
+	font-weight: bold;
+	color: #666;
+}
+
+table.api_table td.small {
+	font-size: 10px;
+}
+
+#main table.api_table td.right {
+	margin-left: none;
+	text-align: right;
+	float: inherit;
+}

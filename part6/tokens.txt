@@ -1,0 +1,43 @@
+Reserved Words		BEGIN			begin
+	 				END				end
+					READ			read
+					WRITE			write
+					INT				int
+					STRING			string
+					BOOL			bool
+					IF				if
+					ELSE			else
+					WHILE			while
+					TRUE			True
+					FALSE			False
+					AND				and
+					OR				or
+					NOT				not
+
+Identifier			ID				\w(\w|\d)*
+	
+Literals			INTLITERAL		\d+
+					STRINGLITERAL	".*?"
+
+Airthmatic			PLUS			+
+operators			MINUS			-
+					MULT			*
+					DIV				/
+					MOD				%
+					EQUALTO			==
+					LESS_EQUALS		<=
+					GREATER_EQUALS	>=
+					LESSTHAN		<
+					GREATERTHAN		>
+					AND				&&
+					OR				||
+					NOT				!
+
+
+Symbols				LPAREN			(
+					RPAREN			)
+					SEMICOLON		;
+					COMMA			,
+					ASSIGNOP		:=
+					LCURLY			{
+					RCURLY			}

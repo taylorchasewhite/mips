@@ -1,0 +1,43 @@
+<program>	   		-->	#start begin <statement list> end #finish
+
+<content>			--> { <statement list> }
+
+<statement list>    --> <statement> { <statement list> }
+
+<statement>	   		-->	<ident> := <expression> #assign ; | <type> <ident> # declare ; |
+		   				read( <id list> #read_ids ) ; | write( <expr list> #write_exprs) ;|
+						while (<expression>) <content> | if (<expression>) <content> {else <content>}
+
+
+<id list>	   		-->  <ident> {, <ident>}
+
+<expr list>	   		--> <expression> { , expression> }
+
+<expression>	    --> <bool> { <bool_op> <bool> # bool_op }
+
+<bool>				--> <clause> { <num_op> <clause> # num_op}
+
+<clause>			--> <term> {<plus op> <term> # add_op } 
+
+<term>              --> <factor> {<mult op> <factor> # mult_op}
+
+<factor>            --> <neg_op> <primary> # negate_term | <primary>
+
+<primary>	   		--> ( <expression> ) | <ident> | 
+						INTLITERAL # process_int_literal | 
+						STRINGLITERAL # process_string_literal |
+						BOOLLITERAL # process_bool_literal
+
+<ident>		   		--> ID # process_id 
+
+<type> 				--> int | string | bool
+
+<plus op>	    	--> PLUS | MINUS
+
+<mult op>           --> MULT | DIV | MOD
+
+<neg op>            --> MINUS | NOT
+
+<num_op>			--> EQUALTO | LESSTHAN | GREATERTHAN | LESS_EQUALS | GREATER_EQUALS
+
+<bool_op>			--> AND | OR

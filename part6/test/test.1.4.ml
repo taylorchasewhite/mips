@@ -1,0 +1,3 @@
+begin
+write(True);
+end

@@ -1,0 +1,21 @@
+Tokens: 20/20
+
+Grammar: 30/30
+
+Booleans: 10/10
+
+Booleans: 7/10
+* Does not test operator precedence.
+
+Relations on ints: 10/10
+
+Conditionals: 10/10
+
+While: 10/10
+
+Nested blocks: 10/10
+
+Comments: 
+* Please use or, and, not for boolean operatos
+
+Score: 107/110 = 19.5

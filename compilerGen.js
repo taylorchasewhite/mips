@@ -26,7 +26,7 @@ function initializeCompiler() {
 	jQuery('#btnCompile').click(function(){
 		jQuery.ajax({
 			type:'post',
-			url:"../../../compiler/part6/compile.php",
+			url:"/compiler/part6/compile.php",
 			//cache:false,
 			data:{ 'data': editor.getSession().getValue() },
 			//async:asynchronous,

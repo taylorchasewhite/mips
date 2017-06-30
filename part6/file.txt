@@ -1,0 +1,5 @@
+begin
+int x;
+x:=1;
+write(x<20);
+end

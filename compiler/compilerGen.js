@@ -1,9 +1,9 @@
 function loadTabStyleSheets() {
-	jQuery('head').append('<link rel="stylesheet" href="/css/buttons.css" type="text/css" />');
-	jQuery('head').append('<link rel="stylesheet" href="/css/tabs.css" type="text/css" />');
-	jQuery('head').append('<link rel="stylesheet" href="/css/normalize.css" type="text/css" />');
-	jQuery('head').append('<link rel="stylesheet" href="/css/tabs2.css" type="text/css" />');
-	jQuery('head').append('<link rel="stylesheet" href="/css/tabstyles.css" type="text/css" />');
+	jQuery('head').append('<link rel="stylesheet" href="./css/buttons.css" type="text/css" />');
+	jQuery('head').append('<link rel="stylesheet" href="./css/tabs.css" type="text/css" />');
+	jQuery('head').append('<link rel="stylesheet" href="./css/normalize.css" type="text/css" />');
+	jQuery('head').append('<link rel="stylesheet" href="./css/tabs2.css" type="text/css" />');
+	jQuery('head').append('<link rel="stylesheet" href="./css/tabstyles.css" type="text/css" />');
     (function() {
      [].slice.call( document.querySelectorAll( '.tabs' ) ).forEach( function( el ) {
   	new CBPFWTabs( el );

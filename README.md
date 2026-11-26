@@ -90,3 +90,8 @@ GitHub Pages publishes the root of `master`. The
 `https://taylorchasewhite.github.io/mips/` in an iframe rather than injecting
 scripts into WordPress/React. Publish code to `master` and verify Pages before
 updating the post's embed and dated repair note.
+
+The older WordPress page at `/projects/mips-compiler/` also embeds the demo.
+Keep that page on WordPress's **default template**, not
+`compiler-page-widgets.php`: the legacy custom template injects the obsolete
+editor and broken iframe independently of the page's saved content.

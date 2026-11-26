@@ -24,18 +24,8 @@ class Compiler:
     
     """Parse the line"""
     # initialize
-    def __init__(self):
-        outFile = ""
-        #READ - IN#
-        if len(sys.argv)>2:
-            fileName = sys.argv[1]
-            outFile = sys.argv[2]
-            x = open(fileName)
-        else:
-            x = open("testr.txt")
-            outFile = "test.asm"
-        #DONE#
-        self.fileList = x.readlines()
+    def __init__(self, source, outFile=None):
+        self.fileList = source.splitlines()
         self.tokenVal   = []
         self.tokenName  = []
         self.line       = []
@@ -51,7 +41,7 @@ class Compiler:
         self.endFound = False
         self.completedParse = False
 
-        self.lastRec = Record("bullshit","asdf", "DONT USE")
+        self.lastRec = False
         self.writeString = []
         
         #self.program()
@@ -97,57 +87,25 @@ class Compiler:
     """                              CONTENT                                        """
     """-----------------------------------------------------------------------------"""
     def content(self, breakNextWord = True): # assuming you don't need to call next token when entering
-        if(self.completedParse):
-            return False
-        if(self.breakNextWord() and not self.completedParse):
-            if(not self.completedParse and self.tokenName[-1] != "LCURLY"):
-                #xprint("looking for Lcurly "+self.tokenName[-1])
-                self.parseError("Missing \'{\' at the end of the conditional statement")
-
-            if (self.statement_list(breakNextWord)):
-                print()
-              #  self.breakNextWord();
-            
-            if(not self.completedParse and not (self.tokenName[-1] == "RCURLY" or (self.tokenName[-2] == "RCURLY" and self.tokenName[-1] == "END"))):
-                #xprint("looking for Rcurly "+self.tokenName[-1])
-                self.parseError("Missing \'}\' at the end of the conditional statement")
-            return True;
+        self.breakNextWord()
+        if self.tokenName[-1] != "LCURLY":
+            self.parseError("Expected '{' after condition")
+        self.statement_list()
+        if self.tokenName[-1] != "RCURLY":
+            self.parseError("Expected '}' at end of block")
+        return True
             
 
     """-----------------------------------------------------------------------------"""       
     """                              STATEMENT LIST                                 """
     """-----------------------------------------------------------------------------"""
     def statement_list(self, breakNextWord = True):
-        if(self.completedParse):
-            return False
-        if(breakNextWord and not self.completedParse):
-             self.breakNextWord();
-        if(not self.completedParse and self.tokenName[-1] == "END"):
-            return False
-        if (not self.completedParse and self.tokenName[-1] == "RCURLY"):
-            return True;
-        ##xprint("right before statment: "+self.tokenName[-1])
-        if (self.statement() and not self.completedParse): # do I need to get another token?
-            self.breakNextWord();
-
-        #if (self.tokenName[-2] == "RCURLY"):
-        return self.statement_list(False)   
-        
-        if (not self.completedParse and self.tokenName[-(1)] == "SEMICOLON"):
-            self.statement_list()
-            return False;
-
-        if (not self.completedParse and self.tokenName[-(1)] == "RCURLY"):
-            return True;
-
-        if (not self.completedParse and self.tokenName[-(2)] == "RCURLY" and (self.tokenName[-(1)] == "END")):
-            return False;
-        
-        elif (not self.completedParse):
-            #xprint("SL2: "+self.tokenName[-1])
-            self.parseError("Missing \';\' in the statement")
-                
-        return False; #do not need to get another token
+        if breakNextWord:
+            self.breakNextWord()
+        while self.tokenName[-1] not in ("END", "RCURLY"):
+            if self.statement():
+                self.breakNextWord()
+        return self.tokenName[-1] == "RCURLY"
 
 
     """-----------------------------------------------------------------------------"""       
@@ -609,7 +567,11 @@ class Compiler:
         if(self.breakNextWord() and not self.completedParse):
            # #xprint("IN FACT1: "+self.tokenName[-1])
             if (self.neg_op()):
+                operator = self.tokenVal[-1]
                 self.breakNextWord()
+                if operator == "-" and self.tokenName[-1] == "INTLITERAL":
+                    self.lastRec = self.codeGen.process_literal("-" + self.tokenVal[-1], self.lex.getLine())
+                    return True
                 if (self.primary()):
                     ##xprint("IN FACT2: "+self.tokenName[-1])
                     self.parseOutput(self.tokenVal[-1])
@@ -619,7 +581,7 @@ class Compiler:
                     else:
                         negVar = self.lastRec.mipsVar
                     #xprint("Negating!!: "+self.tokenVal[-1])
-                    self.lastRec = self.codeGen.negate_term(negVar, self.lex.getLine())
+                    self.lastRec = self.codeGen.negate_term(negVar, self.lex.getLine(), operator)
                     return True;
             else:
                 self.primary()
@@ -716,22 +678,12 @@ class Compiler:
     """                              END                                            """
     """-----------------------------------------------------------------------------"""
     def end(self):
-        if(self.completedParse):
-            return False
-        if(not self.completedParse and self.tokenName[-1] == "END"):
-            if(not self.completedParse and self.breakNextWord(True)):
-                if(not self.completedParse and self.tokenName[-1] == "done" or self.tokenName[-1] == "new_pro"):
-                    passMsg = ("\nCongratulations, the program "+str(self.programCount)+" has passed parsing. You're the home-diggity")
-                    self.parseOutput(passMsg)
-                    #xprint(passMsg)
-                    self.parseOutput(bDivide)
-                    self.newProg()
-                elif (not self.completedParse):
-                    self.parseError("Invalid input after 'end'")
-                    return  
-        elif (not self.completedParse):
-            #xprint("END ERROR: "+self.tokenName[-1]+self.tokenName[-2]+self.tokenName[-3]+self.tokenName[-4])
-            self.parseError("expecting an \'end\'", True)
+        if self.tokenName[-1] != "END":
+            self.parseError("Expected 'end'")
+        if self.lex.getNextWord() != "done":
+            self.parseError("Invalid input after 'end'")
+        self.completedParse = True
+        self.codeGen.finish()
 
 
     ###                              END PRODUCTION METHODS                         ###
@@ -745,22 +697,7 @@ class Compiler:
     """-----------------------------------------------------------------------------"""
 
     def parseError(self, errorMsg = "Need to put a E Message", endError = False):
-        if(self.completedParse):
-            return False
-        error = "\nParse error on line " + str(self.lex.getLine())+": "+errorMsg
-        print(error) # if we hit the end here, is it in error?
-        self.parseOutput(error)
-        ##xprint(bDivide)
-        self.parseOutput(bDivide)
-        x = self.tokenName[-1]
-        if (endError ==False and not self.completedParse):
-            while x != "new_pro" and not self.completedParse:
-                if(x == "done" and not self.completedParse):
-                    sys.exit(0);
-                x = self.lex.getNextWord()
-        if(x == "done" and not self.completedParse):
-            sys.exit(0)
-        self.newProg()
+        raise ValueError(f"Parse error on line {self.lex.getLine()}: {errorMsg}")
 
 
     """-----------------------------------------------------------------------------"""       
@@ -805,37 +742,13 @@ class Compiler:
     """                              BREAK NEXT WORD                                """
     """-----------------------------------------------------------------------------"""
     def breakNextWord(self, cont = False):
-        if(self.completedParse):
-            return False
         x = self.lex.getNextWord()
-        if(x == "new_pro" and not cont and len(self.tokenName) ==0 and not self.completedParse):
-            ##xprint("Start of parser\n---------------\n")
-            self.parseOutput("Start of parser\n---------------\n")
-            self.newProg()
-            self.program()
-        if(x == "new_pro" and not cont and len(self.tokenName) !=0 and not self.completedParse):
-            if(self.tokenName[-1] != "END"):
-                return False 
-        elif (x=="done" and len(self.tokenName)==0 and not self.completedParse): # we are at the end of the file and exit gracefully.
-            self.completedParse = True;
-            self.codeGen.finish()
-            
-            return False
-            #sys.exit(0)
-        elif(x =="done" and (len(self.tokenName) != 0) and not cont and not self.completedParse):
-            if(self.tokenName[-1] != "END" and not self.completedParse):
-                return False
-                self.parseError("Expected end missing.")
-            self.completedParse=True;
-            #sys.exit(0) # end gracefully(?)
-            return False
-        elif(not self.completedParse):
-            x = x.split("|~ ")
-            ##xself.printWord(x)
-            if len(x)>1:
-                self.tokenVal.append(x[1])
-            self.tokenName.append(x[0])
-            return True
+        if x == "done":
+            self.parseError("Unexpected end of input; check for missing 'end', '}', or ';'")
+        kind, value = x.split("|~ ", 1)
+        self.tokenName.append(kind)
+        self.tokenVal.append(value)
+        return True
 
     """-----------------------------------------------------------------------------"""       
     """                              Add to Output Parse                             """
@@ -855,9 +768,28 @@ class Compiler:
 
 
 
-program = Compiler()
-program.program()
-##xprint(program.getOutput())
+def compile_source(source):
+    if len(source) > 50000:
+        raise ValueError("Source exceeds the 50,000-character limit.")
+    program = Compiler(source)
+    try:
+        program.program()
+    except RecursionError as error:
+        raise ValueError("Expression or block nesting is too deep; simplify the program.") from error
+    return program.codeGen.fileContents
 
-""" PROGRAM """
+
+if __name__ == "__main__":
+    import argparse
+    from pathlib import Path
+
+    parser = argparse.ArgumentParser(description="Compile the teaching language to MIPS assembly.")
+    parser.add_argument("source", type=Path)
+    parser.add_argument("output", type=Path)
+    args = parser.parse_args()
+    try:
+        assembly = compile_source(args.source.read_text(encoding="utf-8"))
+        args.output.write_text(assembly, encoding="utf-8")
+    except (ValueError, OSError) as error:
+        parser.exit(1, str(error) + "\n")
 

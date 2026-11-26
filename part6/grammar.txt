@@ -13,7 +13,9 @@
 
 <expr list>	   		--> <expression> { , expression> }
 
-<expression>	    --> <bool> { <bool_op> <bool> # bool_op }
+<expression>	    --> <conjunction> { OR <conjunction> # bool_op }
+
+<conjunction>       --> <bool> { AND <bool> # bool_op }
 
 <bool>				--> <clause> { <num_op> <clause> # num_op}
 
@@ -38,6 +40,6 @@
 
 <neg op>            --> MINUS | NOT
 
-<num_op>			--> EQUALTO | LESSTHAN | GREATERTHAN | LESS_EQUALS | GREATER_EQUALS
+<num_op>			--> EQUALTO | NOT_EQUALS | LESSTHAN | GREATERTHAN | LESS_EQUALS | GREATER_EQUALS
 
 <bool_op>			--> AND | OR

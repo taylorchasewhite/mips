@@ -82,6 +82,7 @@ class CodeGenerator:
         self.ifCount = 0;
         self.elseCount = 0;
         self.afterIfCount = 0;
+        self.ifStack = []
         self.symbolTable = []
         self.begin = False
         return
@@ -120,6 +121,8 @@ class CodeGenerator:
 
             ### begin writing the actual code
             self.addCode(".text")
+            self.addCode(".globl main")
+            self.addCode("main:")
         self.begin = True
     """-----------------------------------------------------------------------------"""       
     """                              FINISH                                         """
@@ -151,14 +154,10 @@ class CodeGenerator:
         left = self.process_id(left, True)                              #  
         #xself.printSymbolTable()
         right = self.getRecUsingMips(right)
-        if(not hasattr(left,'rType')):
-            self.errMessage(str(lineNum) + ": Variable not recognized.") 
-        if(hasattr(left,'rType') and left.rType != "boolID"):
-            if (left.rType[:3].lower() != right.rType[:3].lower()):
-                self.errMessage("Error at line " + str(lineNum) + ", type reassignment not allowed.") 
-                # if it is a string then leave it alone.
-        if (right == False):
-            self.errMessage("ERROR!! RIGHT side of the ASSIGN is not initialized. Error on line: "+str(lineNum))
+        if left is False or right is False:
+            self.errMessage(str(lineNum) + ": Assignment uses an undeclared variable.")
+        if left.rType[:3].lower() != right.rType[:3].lower():
+            self.errMessage(str(lineNum) + ": Assignment types do not match.")
 
         
         if (left.rType == "intID"):                                # if an int
@@ -176,7 +175,7 @@ class CodeGenerator:
                 self.addCode("lw" + "\t" + "$t0" + ",\t" + right.mipsVar + toAssignComment)            
             self.addCode("sw" + "\t" + "$t0" + ",\t" + left.mipsVar+ getAssignedComment)        
         elif(left.rType == "stringID"):
-            if(right.mipsVar.startswith("mips")):
+            if right.rType == "STRINGLITERAL":
                 self.addCode("la" + "\t" + "$t0" + ",\t" + right.mipsVar + toAssignComment)
             else:
                 self.addCode("lw" + "\t" + "$t0" + ",\t" + right.mipsVar + toAssignComment)            
@@ -189,7 +188,6 @@ class CodeGenerator:
     """                              READ IDS                                       """
     """-----------------------------------------------------------------------------"""
     def read_ids(self,toRead, lineNum):
-        print ("\t\ttoRead: " + str(toRead))
                                 # we need to ask exactly how this works. If the variable x is not
                                 # declared, we add it to symbol table?
                                 # what happens if it is declared, do we call assign on it?
@@ -197,16 +195,17 @@ class CodeGenerator:
         variables = toRead.split(',')
         #xprint(toRead)
         for var in variables:
-            rec = self.process_id(var, True) # NEW declare variable
-            rec = self.getRecUsingSrc(var)
+            rec = self.getRecUsingMips(var)
             if (rec == False):
                 self.errMessage(str(lineNum)+": '" + str(var)+"' is not initialized before your READ statement.")
+            if rec.rType != "intID":
+                self.errMessage(str(lineNum) + ": read() requires declared int variables.")
             #self.addCode("\n" + "la" + "\t" + "$a0," + "\t" + "newLine" + "\t\t\t# new line" )
             #self.addCode(writeString)
             #self.addCode("\n" + "la" + "\t" + "$a0," + "\t" + "prompt" + "\t\t\t# prompt")
             #self.addCode(writeString)
             self.addCode(readInt)           # do the read int op.
-            self.addCode("sw\t$v0,\t" + var)
+            self.addCode("sw\t$v0,\t" + rec.mipsVar)
 
     """-----------------------------------------------------------------------------"""       
     """                              WRITE IDS                                       """
@@ -472,9 +471,9 @@ class CodeGenerator:
         loadRec1 = tempLoad                                                     # add them all together
 
 
-        if(op == "or"):
+        if(op in ("or", "||")):
             opLine = "or $t2,\t $t0, \t$t1"
-        elif(op == "and"):
+        elif(op in ("and", "&&")):
             opLine = "and $t2, \t$t0, \t$t1"
 
             
@@ -495,14 +494,11 @@ class CodeGenerator:
     """-----------------------------------------------------------------------------"""
     def process_literal(self, srcVar, lineNum):
         #xprint("\t\tProcess Literal: " + srcVar)
-        negative = ""
-        if (str(srcVar)[0] == "-"):
-            nagative = "neg_"
-        mipsVar = negative + "mips" + srcVar
-        if (int(srcVar)>32768):
-            self.errMessage(str(lineNum) +": '"+str(srcVar)+"' is to long!.")
-            sys.exit(0)
-            #ERROR!!
+        value = int(srcVar)
+        srcVar = str(value)
+        mipsVar = "mips" + ("neg_" if value < 0 else "") + str(abs(value))
+        if not -2147483648 <= value <= 2147483647:
+            self.errMessage(str(lineNum) + ": Integer is outside the signed 32-bit range.")
         rec = self.getRecUsingSrc(srcVar)
         if (rec == False):
             rec = self.addToSymbolTable(srcVar, mipsVar, "INTLITERAL")
@@ -516,7 +512,7 @@ class CodeGenerator:
     def process_string_literal(self, srcVar, lineNum):
         #xprint("\t\tProcess String Literal: " + srcVar)
         mipsVar = "mipsS" + str(self.stringLitCount)
-        rec = self.getRecUsingSrc(srcVar)
+        rec = self.getRecUsingSrc('"' + srcVar + '"')
         if (rec == False):
             rec = self.addToSymbolTable("\"" +srcVar + "\"", mipsVar, "STRINGLITERAL")
             #xself.printSymbolTable();
@@ -549,12 +545,15 @@ class CodeGenerator:
     """-----------------------------------------------------------------------------"""       
     """                              NEGATE TERM                                    """
     """-----------------------------------------------------------------------------"""
-    def negate_term(self, mipsVar, lineNum):                     # by the time we get to negate_term, the value should
+    def negate_term(self, mipsVar, lineNum, operator="-"):
         # be in the fucking symbolTable
         #xprint("\t\tNEGATE " + mipsVar)
         rec = self.getRecUsingMips(mipsVar)
         if(rec == False):
             self.errMessage(str(lineNum) +": You did not provide a proper term for negation.")
+        expected = "int" if operator == "-" else "boo"
+        if rec.rType[:3].lower() != expected:
+            self.errMessage(str(lineNum) + ": Unary operator has the wrong operand type.")
         if(rec.mipsVar == "mipsTrue"):
             rec = self.getRecUsingMips("mipsFalse")
             #xprint("\t\tReturning " + rec.mipsVar)
@@ -563,9 +562,9 @@ class CodeGenerator:
             rec = self.getRecUsingMips("mipsTrue")
             #xprint("\t\tReturning " + rec.mipsVar)
             return rec
-        elif(rec.mipsVar[:4] == "bool"):
+        elif(rec.rType == "boolID"):
             self.addCode("lw $t0, \t" + mipsVar)
-            self.addCode("not $t1, \t$t0")
+            self.addCode("seq $t1, $t0, $zero")
             newVar = "bool" + str(self.boolCount)                               # create the newVar name            
             self.addData(newVar + ": \t" + ".word\t" + "-1")                    # add it to the data declarations
             self.addCode("sw" + "\t" + "$t1,\t" + newVar+ swComment)            # store the value into the new temp variable
@@ -591,11 +590,9 @@ class CodeGenerator:
     """-----------------------------------------------------------------------------"""
     def declare (self, srcVar, idType, lineNum):
         rec = self.getRecUsingSrc(srcVar)
-        mipsVar = srcVar
+        mipsVar = "user_" + srcVar
         #xprint("\t\tDeclare: " + str(srcVar) + " " + str(idType))
         if (rec == False):           # if its not in table and we are supposed to add...  """and addToTable == True"""
-            if (srcVar[:4] == "temp"):                      # 
-                mipsVar = "mipsTemp" + srcVar[5:-1]
             rec = self.addToSymbolTable(srcVar, mipsVar, idType + "ID")
         else:
             self.errMessage(str(lineNum) +": Duplicate declaration")
@@ -612,12 +609,13 @@ class CodeGenerator:
     def ifStart (self, record, lineNum):
         #xprint("\t\tstarting if " + str(varName.mipsVar))
         rec = record
-        if(rec == False):
+        if(rec == False or rec.rType != "boolID"):
             self.errMessage(str(lineNum) +": Invalid boolean term given for condition.")
         self.addCode("lw" + "\t" + "$t0" + ",\t" + rec.mipsVar)
-        self.addCode("beq" + "\t" + "$t0" + ",\t" + "0" + ",\t" + "elseStart" + str(self.elseCount))
+        self.addCode("beq" + "\t" + "$t0" + ",\t" + "0" + ",\t" + "elseStart" + str(self.ifCount))
         self.addCode("\nifStart" + str(self.ifCount) + ":")
         count = self.ifCount
+        self.ifStack.append(count)
         self.ifCount+=1
         return count
 
@@ -626,7 +624,7 @@ class CodeGenerator:
     """                              Else Start                                       """
     """-----------------------------------------------------------------------------"""
     def elseStart (self, count, lineNum):
-        self.addCode("jal" + "\tafterIfCount" + str(count)) # jump to end if
+        self.addCode("j" + "\tafterIfCount" + str(count)) # jump to end if
         self.addCode("\nelseStart" + str(count) + ":")
         self.afterIfCount = count
         #self.elseCount+=1
@@ -635,7 +633,7 @@ class CodeGenerator:
     """                              End If                                           """
     """-----------------------------------------------------------------------------"""
     def endIf (self, lineNum):
-        self.addCode("\nafterIfCount" + str(self.afterIfCount) + ":")
+        self.addCode("\nafterIfCount" + str(self.ifStack.pop()) + ":")
         #self.afterIfCount+=1
 
     """-----------------------------------------------------------------------------"""       
@@ -649,6 +647,8 @@ class CodeGenerator:
 
     def whileStart (self, varName, count, lineNum):
         rec = varName
+        if rec is False or rec.rType != "boolID":
+            self.errMessage(str(lineNum) + ": while() requires a boolean condition.")
         self.addCode("lw" + "\t" + "$t0" + ",\t" + rec.mipsVar)
         self.addCode("beq" + "\t" + "$t0" + ",\t" + "0" + ",\t" + "whileEnd" + str(count))
 
@@ -656,7 +656,7 @@ class CodeGenerator:
     """                              WHILE END                                        """
     """-----------------------------------------------------------------------------"""
     def whileEnd (self, count, lineNum):
-        self.addCode("jal" + "\twhileStart" + str(count)) # jump to while Start
+        self.addCode("j" + "\twhileStart" + str(count)) # jump to while Start
         #self.addCode("jal" + "\twhileStart" + str(self.whileStartCount-1)) # jump to while Start
         self.addCode("\nwhileEnd" + str(count) + ":")
         self.whileEndCount+=1
@@ -676,14 +676,12 @@ class CodeGenerator:
         self.testMethod()
 
     def writeFile(self):
-        print(self.fileContents)
-        fo = open(self.outFile, "wb")
-        fo.write(bytes(self.fileContents, 'UTF-8'))
-        fo.close()
+        if self.outFile is not None:
+            with open(self.outFile, "w", encoding="utf-8") as output:
+                output.write(self.fileContents)
 
     def errMessage(self, error):
-        print("Error on line " + error) # for web display
-        sys.exit("Error on line " + error)
+        raise ValueError("Error on line " + error)
     ###                              END HELPER METHODS                             ###
     ###################################################################################
     ###                                                                             ###

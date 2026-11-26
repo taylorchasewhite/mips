@@ -1,18 +1,27 @@
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-	<script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>MIPS Compiler</title>
+	<link rel="stylesheet" href="./compiler/compiler.css">
 	<script src="./js/cbpFWTabs.js"></script>
 	<script src="./scripts/ace/src-min-noconflict/ace.js" type="text/javascript" charset="utf-8"></script>
 	<script src="./compiler/compilerGen.js" type="text/javascript" charset="utf-8"></script>
 </head>
-<style>
-  .post_content ul li:before {
-    content: none !important;
-  }
-</style>
 <body>
+<h1>MIPS Compiler</h1>
+<p>The teaching language by Taylor White and Robert Smayda, Miami University, 2014.
+Compile locally in your browser, then run the assembly in
+<a href="https://dpetersanderson.github.io/">MARS</a> (delayed branching off).</p>
+<details>
+<summary>About and language reference</summary>
+<p style="padding:0 12px;">Precedence: unary <code>-</code>/<code>not</code>, then
+<code>* / %</code>, <code>+ -</code>, integer comparisons, <code>and</code>, <code>or</code>.
+Aliases: <code>!</code>, <code>&amp;&amp;</code>, <code>||</code>.
+<code>read()</code> accepts integers only. Assign variables before use.</p>
 <section>
- <div class="tabs tabs-style-linemove" style="height:350px;">
+ <div class="tabs tabs-style-linemove">
   <nav>
    <ul>
     <li><a href="#section-linemove-1" class="icon icon-home"><span>About</span></a></li>
@@ -27,7 +36,7 @@
     <header class="entry-header">
 		<h1 class="entry-title">MIPS Compiler</h1>
 	</header>
-	<div style="height:550px;">
+	<div>
 		In the spring of 2014, Robert Smayda and I wrote our own computer language. The language has an LL(1) grammar, which means input is parsed from left to right and constructs a <a href="http://en.wikipedia.org/wiki/Context-free_grammar#Derivations_and_syntax_trees">leftmost syntax tree</a> (derivation). An LL(1) language means that our grammar is context-free, which greatly decreased the difficulty in building an accompanying parser. 
 		<br/><br/>
 		A parser is a tool that iterates through a given set of code and ensures it follows the required grammatical structure. For instance, the english language has a set of <a href="http://rwc.hunter.cuny.edu/reading-writing/on-line/req-sent.html">requirements</a>, like a capital letter at the beginning of the sentence and a period, question mark, or exclamation point at the end. If either of those were missing, a parser would "throw an error" and identify the improper grammar.
@@ -278,7 +287,12 @@
 			<tr class="odd">
 				<td>&lt;expression&gt;</td>
 				<td>&gt;</td>
-				<td>&lt;bool&gt; { &lt;bool_op&gt; &lt;bool&gt; #bool_op }</td>
+				<td>&lt;conjunction&gt; { OR &lt;conjunction&gt; #bool_op }</td>
+			</tr>
+			<tr class="odd">
+				<td>&lt;conjunction&gt;</td>
+				<td>&gt;</td>
+				<td>&lt;bool&gt; { AND &lt;bool&gt; #bool_op }</td>
 			</tr>
 			<tr class="even">
 				<td>&lt;bool&gt;</td>
@@ -430,41 +444,30 @@
 </div><!-- /content -->
 </div><!-- /tabs -->
 </section>
-
-<div id="content" class="clearfix full-width-content">
-	<div id="compiler" style="margin-top:15px;">
-		<div id="topCompiler">
-			<div style="float:left; width:45%;">Enter program:
-			</div>
-			<div style="float:right; width:45%;">Compiled Output:<br/>
-			</div>
-		</div>
-		<div style="clear:both;"></div>
-		<div style="position:relative;">
-			<div><button type="button" id="btnCompile" style="float:left;" class="btn btnBlue">Compile!</button>
-				<div id="parseErrorDiv" style="float:right; width:45%;" class="hidden parseError"></div>
-			</div>
-			<div style="clear:both;"></div>
-			<div style="float:left;width:45%;">
-				<div>
-					<div id="editor0" style="z-index:1;position:relative;top:0;right:0; bottom:0; left:0;height:500px; width:100%;">begin
+</details>
+<main>
+	<div class="toolbar">
+		<button type="button" id="btnCompile" disabled>Compile</button>
+		<button type="button" id="btnDownload" disabled>Download .asm</button>
+		<div id="parseErrorDiv" role="status" aria-live="polite">Loading compiler...</div>
+	</div>
+	<div class="editors">
+		<section>
+			<h2>Source program</h2>
+			<div id="editor0" class="editor">begin
 int x;
 x:=1;
 write(x&lt;20);
 end
 </div>
-				</div>
-			</div>
-			<div id="" style="float:right; width:45%; text-align:left;">
-				<div>
-					<div id="editor1" style="z-index:1;position:relative;top:0;right:0; bottom:0; left:0;height:500px; width:100%;"></div>
-				</div>
-				<script>
-					initializeCompiler();
-					loadTabStyleSheets();
-					</script> 
-				</div>
-				<div style="clear:both;"></div>
-			</div>
-		</body>
-</html>		
+		</section>
+		<section>
+			<h2>MIPS assembly output</h2>
+			<div id="editor1" class="editor"></div>
+		</section>
+	</div>
+	<noscript>This compiler requires JavaScript. You can also run the Python compiler from the repository.</noscript>
+</main>
+<script>initializeCompiler();</script>
+</body>
+</html>
